@@ -340,13 +340,13 @@ def process_webcam_frame():
                         """, unsafe_allow_html=True)
             
             # Minimal delay for UI responsiveness
-            time.sleep(0.01)
+            time.sleep(0.005)
             
     finally:
         cap.release()
 
 def process_video_file(uploaded_file):
-    """Process uploaded video file - plays back at the video's natural speed"""
+    """Process uploaded video file - Optimized for speed"""
     temp_path = f"temp_{uploaded_file.name}"
     with open(temp_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
@@ -358,15 +358,8 @@ def process_video_file(uploaded_file):
         os.remove(temp_path)
         return
     
-    # Read the video's real frame rate so playback can be paced to match it
-    video_fps = cap.get(cv2.CAP_PROP_FPS)
-    if not video_fps or video_fps <= 0:
-        video_fps = 30  # fallback if the file doesn't report a valid FPS
-    
     frame_placeholder = st.empty()
     warning_placeholder = st.empty()
-    
-    start_time = time.time()
     
     try:
         while st.session_state.processing:
@@ -374,22 +367,10 @@ def process_video_file(uploaded_file):
             if not ret:
                 break
             
-            # If detection has fallen behind real time, jump ahead to the
-            # frame that *should* be showing right now instead of processing
-            # every frame in between - this is what keeps playback at
-            # natural speed even when inference is slower than the frame rate.
-            target_frame_idx = (time.time() - start_time) * video_fps
-            current_frame_idx = cap.get(cv2.CAP_PROP_POS_FRAMES)
-            if target_frame_idx - current_frame_idx > 1:
-                cap.set(cv2.CAP_PROP_POS_FRAMES, target_frame_idx)
-                ret, frame = cap.read()
-                if not ret:
-                    break
-            
             # Process frame
             annotated_frame, frame_stats = st.session_state.detector.process_frame(frame)
             
-            # Update statistics (less frequently)
+            # Update statistics (less frequently for performance)
             st.session_state.frame_count += 1
             if st.session_state.frame_count % 5 == 0:
                 st.session_state.stats = st.session_state.detector.get_statistics()
@@ -439,12 +420,7 @@ def process_video_file(uploaded_file):
                         </div>
                         """, unsafe_allow_html=True)
             
-            # Wait until this frame's natural display time has actually
-            # arrived, so fast detection doesn't play the video too quickly
-            next_frame_due = start_time + (cap.get(cv2.CAP_PROP_POS_FRAMES) / video_fps)
-            sleep_time = next_frame_due - time.time()
-            if sleep_time > 0:
-                time.sleep(sleep_time)
+            time.sleep(0.005)
             
     finally:
         cap.release()

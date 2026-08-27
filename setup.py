@@ -13,7 +13,7 @@ setup(
         'numpy>=1.24.0',
         'pandas>=2.0.0',
         'pillow>=10.0.0',
-        'pyyaml>=6.0',
+        'pyyaml>=6.0',       
     ],
     python_requires='>=3.8',
 )

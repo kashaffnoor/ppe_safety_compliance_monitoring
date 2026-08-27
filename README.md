@@ -12,7 +12,7 @@ A real-time Personal Protective Equipment (PPE) detection system for factory flo
 
 ## Quick Start
 
-### Option 1: Use Pre-trained Model (Recommended for Your System)
+### Option 1: Use Pre-trained Model (Our System - Without GPU)
 
 The system will automatically use a pre-trained YOLOv8 model. This provides general object detection capability and works immediately on any system.
 

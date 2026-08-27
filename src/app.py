@@ -340,13 +340,13 @@ def process_webcam_frame():
                         """, unsafe_allow_html=True)
             
             # Minimal delay for UI responsiveness
-            time.sleep(0.005)
+            # No sleep - let it run as fast as possible for normal speed
             
     finally:
         cap.release()
 
 def process_video_file(uploaded_file):
-    """Process uploaded video file - Optimized for speed"""
+    """Process uploaded video file - Optimized for normal speed playback"""
     temp_path = f"temp_{uploaded_file.name}"
     with open(temp_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
@@ -358,6 +358,12 @@ def process_video_file(uploaded_file):
         os.remove(temp_path)
         return
     
+    # Get video FPS for timing
+    video_fps = cap.get(cv2.CAP_PROP_FPS)
+    if not video_fps or video_fps <= 0:
+        video_fps = 30
+    
+    frame_delay = 1.0 / video_fps
     frame_placeholder = st.empty()
     warning_placeholder = st.empty()
     
@@ -370,9 +376,9 @@ def process_video_file(uploaded_file):
             # Process frame
             annotated_frame, frame_stats = st.session_state.detector.process_frame(frame)
             
-            # Update statistics (less frequently for performance)
+            # Update statistics
             st.session_state.frame_count += 1
-            if st.session_state.frame_count % 5 == 0:
+            if st.session_state.frame_count % 3 == 0:
                 st.session_state.stats = st.session_state.detector.get_statistics()
             
             # Convert BGR to RGB for Streamlit
@@ -384,16 +390,15 @@ def process_video_file(uploaded_file):
                 st.image(frame_rgb, channels="RGB", use_container_width=True)
                 st.markdown('</div>', unsafe_allow_html=True)
             
-            # Update warning (less frequently)
-            if st.session_state.frame_count % 5 == 0:
-                if frame_stats['violations'] > 0:
-                    st.session_state.current_warning = {
-                        'type': 'violation',
-                        'message': "⚠️ SAFETY VIOLATION DETECTED",
-                        'details': f"Missing: {', '.join(frame_stats['missing_gear'])}",
-                    }
-                else:
-                    st.session_state.current_warning = None
+            # Update warning
+            if frame_stats['violations'] > 0:
+                st.session_state.current_warning = {
+                    'type': 'violation',
+                    'message': "⚠️ SAFETY VIOLATION DETECTED",
+                    'details': f"Missing: {', '.join(frame_stats['missing_gear'])}",
+                }
+            else:
+                st.session_state.current_warning = None
             
             # Display warning
             with warning_placeholder.container():
@@ -420,7 +425,7 @@ def process_video_file(uploaded_file):
                         </div>
                         """, unsafe_allow_html=True)
             
-            time.sleep(0.005)
+            # No sleep - let it run as fast as possible for normal speed
             
     finally:
         cap.release()

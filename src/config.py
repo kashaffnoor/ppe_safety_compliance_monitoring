@@ -5,9 +5,9 @@ Configuration file for PPE Detection System
 # Model Configuration
 MODEL_CONFIG = {
     'model_type': 'yolov8n',  # Options: yolov8n, yolov8s, yolov8m, yolov8l, yolov8x
-    'confidence_threshold': 0.5,  # Minimum confidence for detection
+    'confidence_threshold': 0.25,  # Lower threshold for better detection of heads/helmets
     'iou_threshold': 0.45,  # IOU threshold for NMS
-    'max_detections': 50,  # Maximum number of detections per frame (reduced for speed)
+    'max_detections': 100,  # Increased max detections
 }
 
 # Required PPE Classes (based on Hard Hat Workers dataset)

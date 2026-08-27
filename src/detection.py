@@ -234,6 +234,11 @@ class PPEDetector:
             has_helmet = 1 in detected_classes
             has_person_or_head = 2 in detected_classes or 0 in detected_classes
             
+            # Count heads without helmets
+            heads_without_helmets = 0
+            if 0 in detected_classes and not has_helmet:
+                heads_without_helmets = 1
+            
             if has_person_or_head and not has_helmet:
                 frame_stats['violations'] = 1
                 frame_stats['missing_gear'] = ['helmet']
